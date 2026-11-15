@@ -1,0 +1,120 @@
+:root {
+  font-family: Arial, sans-serif;
+  color: #000;
+  background: #fff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  width: 440px;
+  margin: 0 auto;
+  padding: 48px 0;
+  text-align: center;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+}
+
+.connection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 24px;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.indicator {
+  width: 9px;
+  height: 9px;
+  border: 1px solid #000;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.indicator-on {
+  background: #000;
+}
+
+.button,
+input {
+  border: 1px solid #000;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.button {
+  display: flex;
+  padding: 20px 20px;
+  color: #fff;
+  background: #000;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #333;
+}
+
+.panel {
+  margin-top: 10px;
+  padding: 18px;
+  border: 1px solid #000;
+  border-radius: 4px;
+}
+
+.panel label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+input {
+  width: 100px;
+  padding: 8px;
+  color: #000;
+  background: #fff;
+  text-align: center;
+}
+
+.reading {
+  padding: 28px 18px;
+}
+
+.reading > span {
+  display: block;
+}
+
+.reading strong {
+  display: block;
+  margin: 12px 0;
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.reading p {
+  margin: 0;
+  color: #333;
+}
+
+.details {
+  text-align: left;
+}
+
+.details p {
+  margin: 8px 0;
+}
+
+.details p:last-child {
+  color: #666;
+  font-size: 0.8rem;
+}

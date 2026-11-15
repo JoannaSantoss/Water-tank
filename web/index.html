@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nível da água</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Span é um pequeno texto utilizavel. -->
+    <!-- label é um nome ou descrição de campo. -->  
+    <!-- input é um campo de entrada de dados. -->  
+    <main class="container">
+      <h1>Nível da água</h1>
+      <p class="connection">
+
+        <span id="connectionIndicator" class="indicator"></span>
+        <span id="connectionStatus">Arduino desconectado</span>
+      </p>
+
+      <button id="connectButton" class="button">Conectar Arduino</button>
+
+      <section class="panel">
+     
+        <label for="tankHeight">Altura do reservatório (cm)</label>
+        <input id="tankHeight" type="number" min="1" value="320" />
+      </section>
+
+      <section class="reading panel">
+        <span>Nível atual</span>
+        <strong><span id="levelValue">--</span> cm</strong>
+        <p id="levelStatus">Aguardando leitura</p>
+      </section>
+
+      <section class="panel details">
+        <p>Percentual preenchido: <strong><span id="percentageValue">--</span>%</strong></p>
+        <p>Distância do sensor: <strong><span id="distanceValue">--</span> cm</strong></p>
+        <p id="lastUpdate">Sem leitura</p>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
