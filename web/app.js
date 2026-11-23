@@ -11,15 +11,30 @@ const levelBadge = document.querySelector("#levelBadge");
 const lastUpdate = document.querySelector("#lastUpdate");
 const waterFill = document.querySelector("#waterFill");
 const liveChip = document.querySelector(".live-chip i");
+const pumpMode = document.querySelector("#pumpMode");
+const pumpStatus = document.querySelector("#pumpStatus");
+const pumpStatusBadge = document.querySelector("#pumpStatusBadge");
 
 let lastDistance = null;
 let activePort = null;
 let activeReader = null;
+let activeWriter = null;
+let pumpFillActive = false;
+let pumpDrainActive = false;
 
 connectButton.addEventListener("click", () => {
   if (activePort) disconnectArduino();
   else connectToArduino();
 });
+
+for (const [selector, command] of [
+  ["#pumpAutoButton", "AUTO"],
+  ["#pumpFillButton", "ABASTECER 1"],
+  ["#pumpDrainButton", "ESVAZIAR 1"],
+  ["#pumpStopButton", "PARAR"]
+]) {
+  document.querySelector(selector).addEventListener("click", () => sendCommand(command));
+}
 
 tankHeightInput.addEventListener("input", () => {
   const height = Number.parseFloat(tankHeightInput.value);
@@ -38,6 +53,7 @@ async function connectToArduino() {
     const port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
     activePort = port;
+    activeWriter = port.writable.getWriter();
     setConnectionState("Arduino conectado", true);
 
     const decoder = new TextDecoderStream();
@@ -54,8 +70,20 @@ async function connectToArduino() {
       buffer = lines.pop();
 
       for (const line of lines) {
-        const match = line.match(/Distancia:\s*(-?\d+(?:\.\d+)?)\s*cm/i);
-        if (match) updateDashboard(Number.parseFloat(match[1]));
+        const distanceMatch = line.match(/Distancia:\s*(-?\d+(?:\.\d+)?)\s*cm/i);
+        if (distanceMatch) updateDashboard(Number.parseFloat(distanceMatch[1]));
+
+        const modeMatch = line.match(/^Modo:(AUTO|MANUAL)/i);
+        if (modeMatch) pumpMode.textContent = modeMatch[1].toUpperCase() === "AUTO" ? "Modo automático" : "Modo manual";
+
+        if (/^Abastecer:/i.test(line)) {
+          pumpFillActive = /^Abastecer:1/i.test(line);
+          updatePumpStatus(pumpFillActive, pumpDrainActive);
+        }
+        if (/^Esvaziar:/i.test(line)) {
+          pumpDrainActive = /^Esvaziar:1/i.test(line);
+          updatePumpStatus(pumpFillActive, pumpDrainActive);
+        }
       }
     }
   } catch (error) {
@@ -66,9 +94,7 @@ async function connectToArduino() {
       connectionStatus.title = error.message;
     }
   } finally {
-    if (!activePort) {
-      setConnectionState("Desconectado", false);
-    }
+    if (!activePort) setConnectionState("Desconectado", false);
   }
 }
 
@@ -79,16 +105,40 @@ async function disconnectArduino() {
       activeReader.releaseLock();
       activeReader = null;
     }
+    if (activeWriter) {
+      activeWriter.releaseLock();
+      activeWriter = null;
+    }
     if (activePort) {
       await activePort.close();
       activePort = null;
     }
   } catch (error) {
     activeReader = null;
+    activeWriter = null;
     activePort = null;
   }
   setConnectionState("Conectar dispositivo", false);
   liveChip.classList.remove("active");
+}
+
+async function sendCommand(command) {
+  if (!activeWriter) {
+    setConnectionState("Conecte o dispositivo", false, true);
+    return;
+  }
+  await activeWriter.write(new TextEncoder().encode(`${command}\n`));
+}
+
+function updatePumpStatus(abastecer, esvaziar) {
+  if (abastecer) {
+    pumpStatus.textContent = "Puxando água";
+  } else if (esvaziar) {
+    pumpStatus.textContent = "Enviando água";
+  } else {
+    pumpStatus.textContent = "Parada";
+  }
+  pumpStatusBadge.className = abastecer || esvaziar ? "level-badge high" : "level-badge neutral";
 }
 
 function updateDashboard(distance) {
@@ -130,10 +180,7 @@ function setConnectionState(message, connected, error = false) {
   connectionStatus.textContent = message;
   connectionStatus.title = "";
   connectionIndicator.className = "status-dot";
-  if (connected) {
-    connectionIndicator.classList.add("connected");
-  } else if (error) {
-    connectionIndicator.classList.add("error");
-  }
+  if (connected) connectionIndicator.classList.add("connected");
+  else if (error) connectionIndicator.classList.add("error");
   liveChip.classList.toggle("active", connected);
 }
