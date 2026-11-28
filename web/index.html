@@ -3,40 +3,130 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nível da água</title>
+    <meta name="theme-color" content="#07111f" />
+    <title>AquaControl | Monitor do Reservatório</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- Span é um pequeno texto utilizavel. -->
-    <!-- label é um nome ou descrição de campo. -->  
-    <!-- input é um campo de entrada de dados. -->  
-    <main class="container">
-      <h1>Nível da água</h1>
-      <p class="connection">
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
 
-        <span id="connectionIndicator" class="indicator"></span>
-        <span id="connectionStatus">Arduino desconectado</span>
-      </p>
+    <main class="dashboard">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2.8S5.5 10.1 5.5 15.2a6.5 6.5 0 0 0 13 0C18.5 10.1 12 2.8 12 2.8Z"/><path d="M8.8 16.2c.6 1.7 2.1 2.5 3.8 2.5"/></svg>
+          </div>
+          <div>
+            <span class="eyebrow">AquaControl</span>
+            <h1>Reservatório principal</h1>
+          </div>
+        </div>
 
-      <button id="connectButton" class="button">Conectar Arduino</button>
+        <button id="connectButton" class="connect-button" type="button">
+          <span id="connectionIndicator" class="status-dot"></span>
+          <span id="connectionStatus">Conectar dispositivo</span>
+        </button>
+      </header>
 
-      <section class="panel">
-     
-        <label for="tankHeight">Altura do reservatório (cm)</label>
-        <input id="tankHeight" type="number" min="1" value="320" />
-      </section>
+      <div class="dashboard-grid">
+        <section class="tank-card card">
+          <div class="card-heading">
+            <div>
+              <span class="section-label">Volume atual</span>
+              <div class="percentage"><span id="percentageValue">--</span><small>%</small></div>
+            </div>
+            <span id="levelBadge" class="level-badge neutral"><i></i><span id="levelStatus">Aguardando</span></span>
+          </div>
 
-      <section class="reading panel">
-        <span>Nível atual</span>
-        <strong><span id="levelValue">--</span> cm</strong>
-        <p id="levelStatus">Aguardando leitura</p>
-      </section>
+          <div class="tank-visual" aria-label="Indicador visual do nível da água">
+            <div class="tank-ruler" aria-hidden="true">
+              <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+            </div>
+            <div class="tank">
+              <div class="tank-glass"></div>
+              <div id="waterFill" class="water-fill" style="height: 0%">
+                <div class="wave wave-back"></div>
+                <div class="wave wave-front"></div>
+                <div class="water-shine"></div>
+              </div>
+              <div class="tank-scale" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+            </div>
+          </div>
 
-      <section class="panel details">
-        <p>Percentual preenchido: <strong><span id="percentageValue">--</span>%</strong></p>
-        <p>Distância do sensor: <strong><span id="distanceValue">--</span> cm</strong></p>
-        <p id="lastUpdate">Sem leitura</p>
-      </section>
+          <div class="tank-footer">
+            <span id="levelValue">--</span>
+            <span>cm de água</span>
+          </div>
+        </section>
+
+        <aside class="side-column">
+          <section class="card info-card">
+            <div class="card-heading compact">
+              <div>
+                <span class="section-label">Detalhes</span>
+                <h2>Medidas em tempo real</h2>
+              </div>
+              <div class="live-chip"><i></i> AO VIVO</div>
+            </div>
+
+            <div class="metrics">
+              <article class="metric">
+                <div class="metric-icon cyan">
+                  <svg viewBox="0 0 24 24"><path d="M3 12h18M7 8v8M17 8v8M12 5v14"/></svg>
+                </div>
+                <div><span>Distância do sensor</span><strong><b id="distanceValue">--</b> cm</strong></div>
+              </article>
+
+              <article class="metric">
+                <div class="metric-icon blue">
+                  <svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M7 16l3-4 3 2 4-6"/></svg>
+                </div>
+                <div><span>Capacidade definida</span><strong><b id="tankHeightValue">320</b> cm</strong></div>
+              </article>
+
+              <article class="metric">
+                <div class="metric-icon violet">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+                </div>
+                <div><span>Última atualização</span><strong id="lastUpdate">Sem leitura</strong></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="card calibration-card">
+            <div class="calibration-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 3v18M5 6h14M7 10h10M9 14h6M11 18h2"/></svg>
+            </div>
+            <div class="calibration-content">
+              <label for="tankHeight">Altura do reservatório</label>
+              <div class="input-wrap">
+                <input id="tankHeight" type="number" min="1" value="320" inputmode="decimal" />
+                <span>cm</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card pump-card">
+            <div class="pump-heading">
+              <div>
+                <span class="section-label">Controle da bomba</span>
+                <h2 id="pumpMode">Modo automático</h2>
+              </div>
+              <span id="pumpStatusBadge" class="level-badge neutral"><i></i><span id="pumpStatus">Parada</span></span>
+            </div>
+
+            <div class="pump-buttons">
+              <button id="pumpAutoButton" class="pump-button" type="button">Automático</button>
+              <button id="pumpFillButton" class="pump-button" type="button">Puxar água</button>
+              <button id="pumpDrainButton" class="pump-button" type="button">Enviar água</button>
+              <button id="pumpStopButton" class="pump-button stop" type="button">Parar</button>
+            </div>
+          </section>
+        </aside>
+      </div>
     </main>
     <script src="app.js"></script>
   </body>

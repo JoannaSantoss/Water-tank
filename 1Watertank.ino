@@ -116,24 +116,19 @@ void loop() {
 // Piscar sem travar o programa
 //300 ms se transborda, e 600 em nível normal.
   unsigned long periodo = transborda ? 300 : 600;
-// Verifica se já passou o tempo do período.
+  // Verifica se já passou o tempo do período.
   if (agora - ultimoPisca >= periodo) {
-  if (agora - ultimoPisca >= periodo) {
-// Registra o momento em que o pisca mudou de estado.
+    // Registra o momento em que o pisca mudou de estado.
     ultimoPisca = agora;
     ledLigado = !ledLigado;
   }
 
- // Aplica nos LEDs
+  // Aplica nos LEDs
   digitalWrite(LED_TRANSBORDA, transborda && ledLigado);
   digitalWrite(LED_VERDE, verde);
   digitalWrite(LED_AMARELO, amarelo);
 
-
- // Buzzer
- //Emite som de 1000hz se estiver transbordando
-
-  if (transborda && ledLigado)      tone(BUZZER, 1000);
-  else                                noTone(BUZZER);
-  }
+  // Emite som de 1000 Hz se estiver transbordando.
+  if (transborda && ledLigado) tone(BUZZER, 1000);
+  else noTone(BUZZER);
 }

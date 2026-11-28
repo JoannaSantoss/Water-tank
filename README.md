@@ -14,10 +14,10 @@ Every **1000 ms**, the firmware takes up to 3 distance samples, averages valid r
 
 | Distance Range (`cm`) | State | Indicator Behavior |
 | :--- | :--- | :--- |
-| `<= 100.0 cm` (`LIM_TRANSBORDA`) | **Overflow / High Level** | Red LED blinks rapidly (`300 ms` half-period) + `1000 Hz` buzzer pulse |
-| `> 100.0` and `< 210.0 cm` (`LIM_BAIXO`) | **Normal Level** | Green LED active (Note: currently tied to the blink toggle in `loop`) |
-| `>= 210.0` and `< 320.0 cm` (`LIM_VAZIO`) | **Low Level** | Yellow LED active (Note: currently tied to the blink toggle in `loop`) |
-| `>= 320.0 cm` or invalid (`-1`) | **Empty / No Valid Reading** | All LEDs off, buzzer silent |
+| `<= 100.0 cm` (`LIM_MUITO_CHEIO`) | **Very High Level** | Red LED blinks + `1000 Hz` buzzer |
+| `> 100.0` and `< 210.0 cm` | **Normal Level** | Green LED active |
+| `>= 210.0 cm` (`LIM_MUITO_VAZIO`) | **Very Low Level** | Yellow LED active |
+| Invalid reading (`-1`) | **Sensor Failure** | Both pumps stop for safety |
 
 ## Hardware Requirements
 
@@ -37,6 +37,8 @@ Every **1000 ms**, the firmware takes up to 3 distance samples, averages valid r
 | Green LED (Normal) | Anode (+) | `D3` | Normal water level |
 | Yellow LED (Low) | Anode (+) | `D4` | Low water level |
 | Buzzer | Positive (+) | `D6` | `1000 Hz` tone on overflow |
+| Relay — pump to fill/pull water | IN1 | `D7` | Active LOW by default |
+| Relay — pump to send water | IN2 | `D8` | Active LOW by default |
 | Serial Monitor | USB | `9600 baud` | Prints `Distancia: <value> cm` |
 
 ## Getting Started
@@ -51,6 +53,37 @@ Every **1000 ms**, the firmware takes up to 3 distance samples, averages valid r
 Measure the physical distance from the face of the ultrasonic sensor to the water surface at key levels, then update the constants at the top of the sketch:
 
 ```cpp
-const float LIM_TRANSBORDA = 100.0; // Max safe height before overflow warning (cm)
-const float LIM_BAIXO      = 210.0; // Threshold for low-level warning (cm)
-const float LIM_VAZIO      = 320.0; // Distance at or near empty tank (cm)
+const float LIM_MUITO_CHEIO = 100.0;
+const float LIM_NORMAL_CHEIO = 115.0;
+const float LIM_MUITO_VAZIO = 210.0;
+const float LIM_NORMAL_VAZIO = 195.0;
+```
+
+## Pump Control
+
+The firmware can control two independent pumps or one bidirectional transfer system:
+
+- At `<= 100 cm`, the tank is very full and the drain pump is activated.
+- At `>= 210 cm`, the tank is very empty and the fill pump is activated.
+- The drain pump stops at `>= 115 cm` and the fill pump stops at `<= 195 cm`.
+- Invalid sensor readings stop both pumps for safety.
+- The two pump outputs are interlocked, so they can never be enabled together.
+
+If the relay module uses a positive trigger instead of an active-low trigger, set:
+
+```cpp
+const bool RELAY_ACTIVE_LOW = false;
+```
+
+Never power a pump directly from Arduino pins. Use an appropriately rated relay module, external pump power supply, common-ground wiring, and flyback protection. Disconnect mains power during assembly.
+
+## Web Control
+
+Open `web/index.html` in Chrome or Edge, click **Conectar dispositivo**, and select the Arduino serial port. The page can:
+
+- switch to automatic operation with `AUTO`;
+- manually activate the fill pump with `ABASTECER 1`;
+- manually activate the drain pump with `ESVAZIAR 1`;
+- stop both pumps with `PARAR`.
+
+The Arduino also returns `Distancia`, `Modo`, `Abastecer`, and `Esvaziar` lines at `9600` baud for the web dashboard.
